@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+  namespace: logs
+  labels:
+    type: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+      - name: elasticsearch
+        image: elasticsearch:7.11.1
+        ports:
+        - containerPort: 9200
+        - containerPort: 9300
+        securityContext:    # this will allow pod to make changes on the Host directory
+          privileged: true
+        env:
+        - name: discovery.type
+          value: single-node
+        - name: xpack.security.enabled
+          value: "false"
+        volumeMounts:
+        - name: elasticsearch-data
+          mountPath: /usr/share/elasticsearch/data
+        resources:
+          limits:
+            memory: "1G"
+      volumes:
+      - name: elasticsearch-data
+        hostPath: 
+          path: /tmp/elasticsearch-data
+        

@@ -1,0 +1,69 @@
+version: "3.4"
+services:
+  broker:
+    image: redis:6.0
+    restart: always
+
+  db:
+    image: postgres:13
+    restart: always
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB_FILE: /run/secrets/postgres_db
+      POSTGRES_USER_FILE: /run/secrets/postgres_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_db
+      - postgres_user
+      - postgres_password
+
+  webserver:
+    image: paperlessngx/paperless-ngx:latest
+    restart: always
+    depends_on:
+      - db
+      - broker
+    ports:
+      - 8000:8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - ./data:/usr/src/paperless/data
+      - ./media:/usr/src/paperless/media
+      - /volume1/Paperless/Export:/usr/src/paperless/export
+      - /volume1/Paperless/Import:/usr/src/paperless/consume
+    environment:
+      PAPERLESS_REDIS: ${PAPERLESS_REDIS}
+      PAPERLESS_DBHOST: ${PAPERLESS_DBHOST}
+      PAPERLESS_DBPASS: ${PAPERLESS_DBPASS}
+      PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE}
+      USERMAP_UID: ${USERMAP_UID}
+      USERMAP_GID: ${USERMAP_GID}
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
+      PAPERLESS_TIKA_ENABLED: ${PAPERLESS_TIKA_ENABLED}
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: ${PAPERLESS_TIKA_GOTENBERG_ENDPOINT}
+      PAPERLESS_TIKA_ENDPOINT: ${PAPERLESS_TIKA_ENDPOINT}
+      PAPERLESS_ALLOWED_HOSTS: ${PAPERLESS_ALLOWED_HOSTS}
+      PAPERLESS_URL: ${PAPERLESS_URL}
+ 
+  gotenberg:
+    image: thecodingmachine/gotenberg
+    restart: always
+    environment:
+      DISABLE_GOOGLE_CHROME: ${DISABLE_GOOGLE_CHROME}
+
+  tika:
+    image: apache/tika
+    restart: always
+    
+secrets:
+  postgres_db:
+    file: ./Secrets/postgres_db.txt
+  postgres_user:
+    file: ./Secrets/postgres_user.txt
+  postgres_password:
+    file: ./Secrets/postgres_password.txt

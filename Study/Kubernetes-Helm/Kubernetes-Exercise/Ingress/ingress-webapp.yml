@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress-webapp
+  namespace: webapp
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: k8s-app.marcogiorgio.net
+      http:
+        paths:
+          - pathType: Prefix
+            backend:
+              service:
+                name: webserver-service
+                port:
+                  number: 80
+            path: /

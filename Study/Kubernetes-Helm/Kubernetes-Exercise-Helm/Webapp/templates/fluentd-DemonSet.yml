@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ .Values.fluentdDemonSet.metadata.name }}
+  namespace: {{ .Values.fluentdDemonSet.metadata.namespace }}
+  labels:
+    k8s-app: {{ .Values.fluentdDemonSet.metadata.labels.k8sapp }}
+    version: {{ .Values.fluentdDemonSet.metadata.labels.version }}
+    kubernetes.io/cluster-service: {{ .Values.fluentdDemonSet.metadata.labels.kubernetes_io_cluster_service}}
+spec: 
+  selector:
+    matchLabels:
+      k8s-app: {{ .Values.fluentdDemonSet.spec.selector.matchLabels.k8s_app }}
+      version: {{ .Values.fluentdDemonSet.spec.selector.matchLabels.version }}
+  template:
+    metadata:
+      labels:
+        k8s-app: {{ .Values.fluentdDemonSet.spec.template.metadata.labels.k9s_app }}
+        version: {{ .Values.fluentdDemonSet.spec.template.metadata.labels.version }}
+        kubernetes.io/cluster-service: {{ .Values.fluentdDemonSet.spec.template.metadata.labels.kubernetes_io_cluster_service }}
+    spec:
+      serviceAccount: {{ .Values.fluentdDemonSet.spec.template.spec.serviceAccount }}
+      serviceAccountName: {{ .Values.fluentdDemonSet.spec.template.spec.serviceAccountName }}
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      containers:
+      - name: {{ .Values.fluentdDemonSet.spec.template.spec.containers.name }}
+        image: {{ .Values.fluentdDemonSet.spec.template.spec.containers.image }}
+        env:
+        {{- range $key, $val := .Values.fluentdDemonSet.spec.template.spec.containers.env}}
+        - name: {{ $key }}
+          value: {{ $val }}
+        {{- end}}
+        resources:
+          limits:
+            memory: {{ .Values.fluentdDemonSet.spec.template.spec.containers.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.fluentdDemonSet.spec.template.spec.containers.resources.requests.cpu }}
+            memory: {{ .Values.fluentdDemonSet.spec.template.spec.containers.resources.requests.memory }}
+        volumeMounts:
+          - name: varlog
+            mountPath: /var/log
+          - name: varlibdockercontainers
+            mountPath: /var/lib/docker/containers
+            readOnly: true
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers

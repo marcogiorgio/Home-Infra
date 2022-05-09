@@ -1,0 +1,64 @@
+version: '3.3'
+
+networks:
+  bridge:
+    driver: bridge
+services:
+  app:
+    image: fireflyiii/core:latest
+    env_file: env_variables.env
+    secrets:
+      - mysql_database
+      - mysql_user
+      - mysql_password
+      - mail_password
+      - app_key
+    volumes:
+      - upload:/var/www/html/storage/upload
+    networks:
+      - bridge
+    ports:
+      - 8090:8080
+    depends_on:
+      - mariadb
+    restart: always
+    
+  mariadb:
+    image: lscr.io/linuxserver/mariadb:latest
+    container_name: firefly-mariadb
+    restart: always
+    volumes:
+      - db:/config
+    environment:
+      - FILE__MYSQL_ROOT_PASSWORD=/run/secrets/mysql_root_password
+      - FILE__MYSQL_DATABASE=/run/secrets/mysql_database
+      - FILE__MYSQL_USER=/run/secrets/mysql_user
+      - FILE__MYSQL_PASSWORD=/run/secrets/mysql_password
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    networks:
+      - bridge
+    secrets:
+      - mysql_root_password
+      - mysql_database
+      - mysql_user
+      - mysql_password
+volumes:
+   upload:
+   db:
+
+secrets:
+  mysql_root_password:
+    file: ./Secrets/mysql_root_password.txt
+  mysql_database:
+    file: ./Secrets/mysql_database.txt
+  mysql_user:
+    file: ./Secrets/mysql_user.txt
+  mysql_password:
+    file: ./Secrets/mysql_password.txt
+  mail_password:
+    file: ./Secrets/mail_password.txt
+  app_key:
+    file: ./Secrets/app_key.txt
+  

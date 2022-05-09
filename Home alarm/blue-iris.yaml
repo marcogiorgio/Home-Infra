@@ -1,0 +1,71 @@
+import requests, json, hashlib, appdaemon.plugins.hass.hassapi as hass
+
+class BlueIris:
+    session = None
+    response = None
+
+    def __init__(self, host, user, password):
+        self.host = host
+        self.user = user
+        self.password = password
+        self.url = "http://"+host+":81/json"
+        r = requests.post(self.url, data=json.dumps({"cmd":"login"}))
+        if r.status_code != 200:
+            print (r.status_code)
+            print (r.text)
+            sys.exit(1)
+        self.session = r.json()["session"]
+        self.response = hashlib.md5(("%s:%s:%s" % (self.user, self.session, self.password)).encode('utf-8')).hexdigest()
+        r = requests.post(self.url, data=json.dumps({"cmd":"login", "session": self.session, "response": self.response}))
+        if r.status_code != 200 or r.json()["result"] != "success":
+            print (r.status_code)
+            print (r.text)
+            sys.exit(1)
+        self.system_name = r.json()["data"]["system name"]
+        self.profiles_list = r.json()["data"]["profiles"]
+        print ("Connected to '%s'" % self.system_name)
+
+    def cmd(self, cmd, params=dict()):
+        args = {"session": self.session, "cmd": cmd}
+        args.update(params)
+
+        # print self.url
+        # print "Sending Data: "
+        # print json.dumps(args)
+        r = requests.post(self.url, data=json.dumps(args))
+
+        if r.status_code != 200:
+            print (r.status_code)
+            print (r.text)
+            sys.exit(1)
+        else:
+            pass
+            #print "success: " + str(r.status_code)
+            #print r.text
+        try:
+            return r.json()["data"]
+        except:
+            return r.json()
+
+    def get_schedule(self):
+        r = self.cmd("status")
+        schedule = r["schedule"]
+        return schedule
+
+    def set_schedule(self, schedule_name):
+        self.cmd("status", {"schedule": schedule_name})
+
+    def logout(self):
+        self.cmd("logout")
+
+class BlueIrisAlarmSync(hass.Hass):
+
+    def initialize(self):
+        self.listen_state(self.alarm_changed, "alarm_control_panel.home")
+
+    def alarm_changed(self, entity, attribute, old, new, kwargs):
+        bi = BlueIris("10.0.7.2", "homeassistant", "SECRET")
+        if self.get_state("alarm_control_panel.home") == "disarmed" or self.get_state("alarm_control_panel.home") == "armed_home":
+            bi.set_schedule("Home")
+        else:
+            bi.set_schedule("Outside")

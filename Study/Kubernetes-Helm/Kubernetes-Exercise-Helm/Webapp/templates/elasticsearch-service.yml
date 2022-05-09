@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.elasticsearchService.metadata.name}}
+  namespace: {{ .Values.elasticsearchService.metadata.namespace}}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Values.elasticsearchService.spec.selector.app}}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.elasticsearchService.ports.requestsPort}}
+      name: {{ .Values.elasticsearchService.ports.requestsName}}
+    - protocol: TCP
+      port: {{ .Values.elasticsearchService.ports.communicationsPort}}
+      name: {{ .Values.elasticsearchService.ports.communicationsName}}

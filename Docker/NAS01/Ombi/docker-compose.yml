@@ -1,0 +1,46 @@
+version: "3"
+services:
+  ombi:
+    image: ghcr.io/linuxserver/ombi:latest
+    container_name: ombi
+    restart: always
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /volume1/docker/Ombi/config:/config
+    ports:
+      - "8060:3579"
+    depends_on:
+    - "mysql_db"
+
+  mysql_db:
+    image: ghcr.io/linuxserver/mariadb:alpine
+    container_name: ombi-mysql
+    environment:
+      - FILE__MYSQL_ROOT_PASSWORD=/run/secrets/mysql_root_password
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - MYSQL_LOG_CONSOLE=${MYSQL_LOG_CONSOLE}
+    secrets:
+      - mysql_root_password
+    volumes:
+      - /volume1/docker/Ombi/mysql:/config
+    restart: always
+
+  phpmyadmin:
+      image: phpmyadmin/phpmyadmin
+      container_name: ombi_phpmyadmin
+      restart: always
+      environment:
+        PMA_HOST: ${PMA_HOST}
+      ports:
+        - '8070:80'
+      depends_on:
+        - "mysql_db"
+
+secrets:
+  mysql_root_password:
+    file: ./Secrets/mysql_root_password.txt

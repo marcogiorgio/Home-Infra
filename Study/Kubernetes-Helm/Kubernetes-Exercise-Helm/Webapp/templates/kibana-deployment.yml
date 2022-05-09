@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: logs
+  labels:
+    type: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+      - name: kibana
+        image: kibana:7.11.1
+        env:
+        {{- range $key, $val := .Values.kibanaDeployment.spec.template.spec.env}}
+        - name: {{ $key | upper }}
+          value: {{ $val }}
+        {{- end}}
+        ports:
+        - containerPort: 5601
+          name: http-kibana

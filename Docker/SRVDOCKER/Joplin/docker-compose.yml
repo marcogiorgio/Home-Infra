@@ -1,0 +1,42 @@
+version: '3'
+services:
+    db:
+        image: postgres:13.1
+        volumes:
+            - db:/var/lib/postgresql/data
+        restart: always
+        environment:
+            - APP_PORT=${APP_PORT}
+            - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+            - POSTGRES_USER_FILE=/run/secrets/postgres_user
+            - POSTGRES_DB_FILE=/run/secrets/postgres_db
+        secrets:
+          - postgres_password
+          - postgres_user
+          - postgres_db
+          
+    app:
+        image: joplin/server:latest
+        depends_on:
+            - db
+        ports:
+            - "22300:22300"
+        restart: always
+        environment:
+            - APP_BASE_URL=${APP_BASE_URL}
+            - DB_CLIENT=${DB_CLIENT}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - POSTGRES_DATABASE=${POSTGRES_DATABASE}
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PORT=${POSTGRES_PORT}
+            - POSTGRES_HOST=${POSTGRES_HOST}
+volumes:
+  db:
+  
+secrets:
+  postgres_password:
+    file: ./Secrets/postgres_password.txt
+  postgres_user:
+    file: ./Secrets/postgres_user.txt
+  postgres_db:
+    file: ./Secrets/postgres_db.txt

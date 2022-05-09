@@ -1,0 +1,7 @@
+{
+    "auths": {
+        "docker.seadrive.org": {
+            "auth": "secret"
+        }
+    }
+}

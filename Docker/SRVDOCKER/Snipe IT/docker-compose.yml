@@ -1,0 +1,56 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:5
+    container_name: snipe-mysql
+    restart: always
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql_root_password
+      - MYSQL_USER_FILE=/run/secrets/mysql_user
+      - MYSQL_PASSWORD_FILE=/run/secrets/mysql_password
+      - MYSQL_DATABASE_FILE=/run/secrets/mysql_database
+    secrets:
+      - mysql_root_password
+      - mysql_user
+      - mysql_password
+      - mysql_database
+  snipeit:
+    image: linuxserver/snipe-it:latest
+    container_name: snipe-it
+    restart: always
+    depends_on:
+      - mysql
+    volumes:
+      - config:/config
+    environment:
+      - APP_URL=${APP_URL}
+      - MYSQL_PORT_3306_TCP_ADDR=${MYSQL_PORT_3306_TCP_ADDR}
+      - MYSQL_PORT_3306_TCP_PORT=${MYSQL_PORT_3306_TCP_PORT}
+      - FILE__MYSQL_DATABASE=/run/secrets/mysql_database
+      - FILE__MYSQL_USER=/run/secrets/mysql_user
+      - FILE__MYSQL_PASSWORD=/run/secrets/mysql_password
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - APP_TRUSTED_PROXIES=${APP_TRUSTED_PROXIES}
+      - ALLOW_IFRAMING=${ALLOW_IFRAMING}
+    secrets:
+      - mysql_user
+      - mysql_password
+      - mysql_database
+    ports:
+      - "8040:80"
+volumes:
+  db:
+  config:
+
+secrets:
+  mysql_root_password:
+    file: ./Secrets/mysql_root_password.txt
+  mysql_user:
+    file: ./Secrets/mysql_user.txt
+  mysql_password:
+    file: ./Secrets/mysql_password.txt
+  mysql_database:
+    file: ./Secrets/mysql_database.txt

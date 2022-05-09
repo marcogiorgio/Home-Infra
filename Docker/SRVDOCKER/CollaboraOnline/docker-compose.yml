@@ -1,0 +1,12 @@
+version: "3.3"
+services:
+  app:
+    image: "collabora/code:6.4.14.3"
+    ports:
+      - "9980:9980"
+    environment:
+      domain: ${domain}
+      extra_params: ${extra_params}
+    cap_add:
+      - MKNOD
+    restart: always

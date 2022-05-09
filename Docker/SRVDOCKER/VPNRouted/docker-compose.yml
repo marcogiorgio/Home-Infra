@@ -1,0 +1,69 @@
+version: "3"
+services:
+  vpn:
+    image: linuxserver/wireguard
+    container_name: vpn
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    volumes:
+      - ./config:/config
+      - /lib/modules:/lib/modules
+    ports:
+      - 51820:51820/udp
+      - 5000:5000 # Whoogle
+      - 3001:3000 # Lingva
+      - 9050:8080 # Libreddit
+      #- 3002:3002 # Invidious
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv6.conf.all.disable_ipv6=0
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    restart: always
+    networks:
+      - vpn
+  
+  whoogle:
+    image: benbusby/whoogle-search:latest
+    container_name: whoogle
+    network_mode: service:vpn
+    environment:
+      - WHOOGLE_CONFIG_URL=${WHOOGLE_CONFIG_URL}
+    restart: always
+    depends_on:
+      - vpn
+  
+  lingva:
+    container_name: lingva
+    image: thedaviddelta/lingva-translate:latest
+    restart: always
+    network_mode: service:vpn
+    environment:
+      - site_domain=${site_domain}
+      - dark_theme=${dark_theme}
+      - default_source_lang=${default_source_lang}
+      - default_target_lang=${default_target_lang}
+    depends_on:
+      - vpn
+      
+  libreddit:
+    container_name: libreddit
+    image: spikecodes/libreddit
+    restart: always
+    network_mode: service:vpn
+    depends_on:
+      - vpn
+
+secrets:
+  postgres_password:
+    file: ./Secrets/postgres_password.txt
+  postgres_db:
+    file: ./Secrets/postgres_db.txt
+
+networks:
+  vpn:
+    name: vpn
+    driver: bridge

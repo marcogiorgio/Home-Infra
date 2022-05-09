@@ -1,0 +1,82 @@
+version: '3'
+
+services:
+  etebase:
+    image: victorrds/etebase:latest
+    container_name: "etebase"
+    volumes:
+      - etebase_data:/data:rw
+    ports:
+      - "9020:3735"
+    environment:
+      SERVER: asgi
+      SUPER_USER_FILE: /run/secrets/super_user
+      SUPER_PASS_FILE: /run/secrets/super_pass
+      DB_ENGINE: ${DB_ENGINE}
+      DATABASE_NAME_FILE: /run/secrets/postgres_db
+      DATABASE_USER_FILE: /run/secrets/postgres_user
+      DATABASE_PASSWORD_FILE: /run/secrets/postgres_password
+      DATABASE_HOST: ${DATABASE_HOST}
+    secrets:
+      - postgres_user
+      - postgres_db
+      - postgres_password
+      - super_user
+      - super_pass
+    depends_on:
+      - db
+    restart: always
+
+  db:
+    image: postgres:13
+    container_name: "etebase-db"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_USER_FILE: /run/secrets/postgres_user
+      POSTGRES_DB_FILE: /run/secrets/postgres_db
+    secrets:
+      - postgres_user
+      - postgres_db
+      - postgres_password
+    restart: always
+    
+  etesync-dav:
+    image: etesync/etesync-dav
+    container_name: "etesync-dav"
+    volumes:
+      - etesync_dav:/data
+    ports:
+      - "9030:37358"
+    environment:
+      ETESYNC_URL: ${ETESYNC_URL}
+    restart: always
+    depends_on:
+      - etebase
+      
+  etesync-app:
+    image: nginx:latest
+    container_name: "etesync-app"
+    volumes:
+      - /home/marco/Docker/Etesync/etesync-web:/usr/share/nginx/html
+    ports:
+      - "9040:80"
+    restart: always
+    
+volumes:
+  etebase_data:
+  postgres_data:
+  etesync_dav:
+
+secrets:
+  postgres_user:
+    file: ./Secrets/postgres_user.txt
+  postgres_db:
+    file: ./Secrets/postgres_db.txt
+  postgres_password:
+    file: ./Secrets/postgres_password.txt
+  super_user:
+    file: ./Secrets/super_user.txt
+  super_pass:
+    file: ./Secrets/super_pass.txt

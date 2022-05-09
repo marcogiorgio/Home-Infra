@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.kibanaService.metadata.name}}
+  namespace: {{ .Values.kibanaService.metadata.namespace}}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{ .Values.kibanaService.spec.selector.app}}
+  ports:
+    - port: {{ .Values.kibanaService.port}}
+      targetPort: {{ .Values.kibanaService.targetPort}}

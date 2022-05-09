@@ -1,0 +1,74 @@
+version: '3.0'
+services:
+  db:
+    image: ghcr.io/linuxserver/mariadb:alpine
+    container_name: seafile-mysql
+    environment:
+      - FILE__MYSQL_ROOT_PASSWORD=/run/secrets/mysql_root_password
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TIME_ZONE}
+      - MYSQL_LOG_CONSOLE=${MYSQL_LOG_CONSOLE}
+    secrets:
+      - mysql_root_password
+    volumes:
+      - /volume1/docker/Seafile/db:/config
+    networks:
+      - seafile-net
+    restart: always
+
+  memcached:
+    image: memcached:1.5.6
+    container_name: seafile-memcached
+    entrypoint: memcached -m 256
+    networks:
+      - seafile-net
+    restart: always
+
+  elasticsearch:
+    image: seafileltd/elasticsearch-with-ik:5.6.16
+    container_name: seafile-elasticsearch
+    environment:
+      - discovery.type=${discovery_type}
+      - bootstrap.memory_lock=${bootstrap_memory_lock}
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 2g
+    volumes:
+      - /volume1/docker/Seafile/elasticsearch:/usr/share/elasticsearch/data
+    networks:
+      - seafile-net
+    restart: always
+          
+  seafile:
+    image: docker.seadrive.org/seafileltd/seafile-pro-mc:latest
+    container_name: seafile
+    ports:
+      - "8090:80"
+#     - "443:443"  # If https is enabled, cancel the comment.
+    volumes:
+      - /volume1/docker/Seafile/data:/shared
+    environment:  
+      - DB_HOST=${DB_HOST}
+      - DB_ROOT_PASSWD=${DB_ROOT_PASSWD}
+      - TIME_ZONE=${TIME_ZONE} # Optional, default is UTC. Should be uncomment and set to your local time zone.
+      - SEAFILE_ADMIN_EMAIL=${SEAFILE_ADMIN_EMAIL} # Specifies Seafile admin user, default is 'me@example.com'
+      - SEAFILE_ADMIN_PASSWORD=${SEAFILE_ADMIN_PASSWORD}     # Specifies Seafile admin password, default is 'asecret'
+      - SEAFILE_SERVER_LETSENCRYPT=${SEAFILE_SERVER_LETSENCRYPT}   # Whether to use https or not
+#      - SEAFILE_SERVER_HOSTNAME=example.seafile.com # Specifies your host name if https is enabled
+    depends_on:
+      - db
+      - memcached
+      - elasticsearch
+    networks:
+      - seafile-net
+
+networks:
+  seafile-net:
+  
+secrets:
+  mysql_root_password:
+    file: ./Secrets/mysql_root_password.txt

@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Values.elasticsearchDeployment.metadata.name}}
+  namespace: {{.Values.elasticsearchDeployment.metadata.namespace}}
+  labels:
+    type: {{.Values.elasticsearchDeployment.labels.type}}
+spec:
+  replicas: {{.Values.elasticsearchDeployment.spec.replicas}}
+  selector:
+    matchLabels:
+      app: {{.Values.elasticsearchDeployment.spec.selector.matchLabels.app}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.elasticsearchDeployment.spec.template.metadata.labels}}
+    spec:
+      containers:
+      - name: {{.Values.elasticsearchDeployment.spec.template.spec.webappContainerName}}
+        image: {{.Values.elasticsearchDeployment.spec.template.spec.webappContainerImage}}
+        ports:
+        {{- range .Values.elasticsearchDeployment.spec.template.spec.webappContainerPort}}
+        - containerPort: {{ . }}
+        {{- end}}
+        securityContext:    # this will allow pod to make changes on the Host directory
+          privileged: true
+        env:
+        {{- range $key, $val := .Values.elasticsearchDeployment.spec.template.spec.env}}
+        - name: {{ $key }}
+          value: {{ $val }}
+        {{- end}}
+        volumeMounts:
+        - name: {{.Values.elasticsearchDeployment.spec.template.spec.volumeMounts.name}}
+          mountPath: {{.Values.elasticsearchDeployment.spec.template.spec.volumeMounts.mountPath}}
+        resources:
+          limits:
+            memory: {{.Values.elasticsearchDeployment.spec.template.spec.resources.limits.memory}}
+      volumes:
+      - name: {{.Values.elasticsearchDeployment.spec.template.volumes.name}}
+        hostPath: 
+          path: {{.Values.elasticsearchDeployment.spec.template.volumes.hostPath.path}}

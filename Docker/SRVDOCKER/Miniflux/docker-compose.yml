@@ -1,0 +1,49 @@
+version: '3'
+services:
+  miniflux:
+    image: miniflux/miniflux:latest
+    ports:
+      - "8030:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+    environment:
+      - DATABASE_URL_FILE=/run/secrets/database_url
+      - RUN_MIGRATIONS=${RUN_MIGRATIONS}
+      - CREATE_ADMIN=${CREATE_ADMIN}
+      - ADMIN_USERNAME_FILE=/run/secrets/admin_username
+      - ADMIN_PASSWORD_FILE=/run/secrets/admin_password
+    secrets:
+      - database_url
+      - admin_username
+      - admin_password
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER_FILE=/run/secrets/postgres_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+    secrets:
+      - postgres_user
+      - postgres_password
+    restart: always
+    volumes:
+      - miniflux-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "miniflux"]
+      interval: 10s
+      start_period: 30s
+volumes:
+  miniflux-db:
+  
+secrets:
+  postgres_user:
+    file: ./Secrets/postgres_user.txt
+  postgres_password:
+    file: ./Secrets/postgres_password.txt
+  database_url:
+    file: ./Secrets/database_url.txt
+  admin_username:
+    file: ./Secrets/admin_username.txt
+  admin_password:
+    file: ./Secrets/admin_password.txt

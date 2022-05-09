@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: logs
+  labels:
+    type: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+    spec:
+      containers:
+      - name: kibana
+        image: kibana:7.11.1
+        env:
+        - name: ELASTICSEARCH_HOSTS
+          value: http://elasticsearch-service:9200
+        - name: XPACK_SECURITY_ENABLED
+          value: "false"
+        ports:
+        - containerPort: 5601
+          name: http-kibana

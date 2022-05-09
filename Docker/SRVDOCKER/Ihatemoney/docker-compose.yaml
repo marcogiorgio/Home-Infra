@@ -1,0 +1,66 @@
+version: "3.9"
+
+services:
+  ihatemoney:
+    image: ihatemoney/ihatemoney:latest
+    container_name: ihatemoney-app
+    depends_on: 
+      - db
+    environment:
+      - DEBUG=${DEBUG}
+      - ACTIVATE_ADMIN_DASHBOARD=${ACTIVATE_ADMIN_DASHBOARD}
+      - ACTIVATE_DEMO_PROJECT=${ACTIVATE_DEMO_PROJECT}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - ALLOW_PUBLIC_PROJECT_CREATION=${ALLOW_PUBLIC_PROJECT_CREATION}
+      - BABEL_DEFAULT_TIMEZONE=${BABEL_DEFAULT_TIMEZONE}
+      - GREENLET_TEST_CPP=${GREENLET_TEST_CPP}
+      - MAIL_DEFAULT_SENDER=${MAIL_DEFAULT_SENDER}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_SERVER=${MAIL_SERVER}
+      - MAIL_USE_SSL=${MAIL_USE_SSL}
+      - MAIL_USE_TLS=${MAIL_USE_TLS}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - SECRET_KEY=${SECRET_KEY}
+      - SESSION_COOKIE_SECURE=${SESSION_COOKIE_SECURE}
+      - SHOW_ADMIN_EMAIL=${SHOW_ADMIN_EMAIL}
+      - SQLALCHEMY_DATABASE_URI=${SQLALCHEMY_DATABASE_URI}
+      - SQLALCHEMY_TRACK_MODIFICATIONS=${SQLALCHEMY_TRACK_MODIFICATIONS}
+      - ENABLE_CAPTCHA=${ENABLE_CAPTCHA}
+      - LEGAL_LINK=${LEGAL_LINK}
+      - PORT=${PORT}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    ports:
+      - "8010:8000"
+    restart: always
+
+
+  db:
+    container_name: ihatemoney-db
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER_FILE=/run/secrets/postgres_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+      - POSTGRES_DB_FILE=/run/secrets/postgres_db
+    restart: always
+    volumes:
+      - ihatemoney-db:/var/lib/postgresql/data
+    secrets:
+      - postgres_password
+      - postgres_user
+      - postgres_db
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "ihatemoney"]
+      interval: 10s
+      start_period: 30s
+volumes:
+  ihatemoney-db:
+
+secrets:
+  postgres_password:
+    file: ./Secrets/postgres_password.txt
+  postgres_user:
+    file: ./Secrets/postgres_user.txt
+  postgres_db:
+    file: ./Secrets/postgres_db.txt

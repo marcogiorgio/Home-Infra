@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana-service
+  namespace: logs
+spec:
+  type: ClusterIP
+  selector:
+    app: kibana
+  ports: 5601
+  targetPorts: http-kibana

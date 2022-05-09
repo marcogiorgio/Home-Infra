@@ -1,0 +1,65 @@
+version: "3"
+services:
+  app:
+    image: lscr.io/linuxserver/bookstack
+    environment:
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - APP_URL=${APP_URL}
+      - DB_HOST=${DB_HOST}
+      - FILE__DB_USERNAME=/run/secrets/mysql_user
+      - FILE__DB_PASSWORD=/run/secrets/mysql_password
+      - FILE__DB_DATABASE=/run/secrets/mysql_database
+      - MAIL_DRIVER=${MAIL_DRIVER}
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_ENCRYPTION=${MAIL_ENCRYPTION}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - FILE__MAIL_PASSWORD=/run/secrets/mail_password
+      - MAIL_FROM=${MAIL_FROM}
+      - MAIL_FROM_NAME=${MAIL_FROM_NAME}
+    secrets:
+      - mysql_root_password
+      - mysql_database
+      - mysql_user
+      - mysql_password
+      - mail_password
+    volumes:
+      - config:/config
+    ports:
+      - 6875:80
+    restart: always
+    depends_on:
+      - db
+  db:
+    image: lscr.io/linuxserver/mariadb
+    environment:
+      - FILE__MYSQL_ROOT_PASSWORD=/run/secrets/mysql_root_password
+      - FILE__MYSQL_DATABASE=/run/secrets/mysql_database
+      - FILE__MYSQL_USER=/run/secrets/mysql_user
+      - FILE__MYSQL_PASSWORD=/run/secrets/mysql_password
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    secrets:
+      - mysql_root_password
+      - mysql_database
+      - mysql_user
+      - mysql_password
+    volumes:
+      - config:/config
+    restart: always
+volumes:
+  config:
+
+secrets:
+  mysql_root_password:
+    file: ./Secrets/mysql_root_password.txt
+  mysql_database:
+    file: ./Secrets/mysql_database.txt
+  mysql_user:
+    file: ./Secrets/mysql_user.txt
+  mysql_password:
+    file: ./Secrets/mysql_password.txt
+  mail_password:
+    file: ./Secrets/mail_password.txt

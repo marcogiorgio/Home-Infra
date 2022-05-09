@@ -1,0 +1,157 @@
+# Heiman Siren Integration from MQTT
+switch:
+  - platform: "mqtt"
+    name: Heiman siren
+    state_topic: "zigbee2mqtt/0x804b50fffe2c2717/set"
+    availability_topic: "zigbee2mqtt/bridge/state"
+    payload_off: '{"warning": {"duration": 0, "mode": "stop", "strobe": false}}'
+    payload_on: '{"warning": {"duration": 180, "mode": "emergency", "strobe": true}}'
+    # value_template: "{{ value_json.state }}"
+    command_topic: "zigbee2mqtt/0x804b50fffe2c2717/set"
+
+# Heiman Siren on/off script
+script:
+  siren_alarm_on:
+    alias: 'zigbee siren on'
+    sequence:
+      - service: mqtt.publish
+        data_template:
+          topic: "zigbee2mqtt/0x804b50fffe2c2717/set"
+          payload: '{"warning": {"duration": 60, "mode": "burglar", "strobe": true}}'
+
+  siren_alarm_off:
+    alias: 'zigbee siren off'
+    sequence:
+      - service: mqtt.publish
+        data_template:
+          topic: "zigbee2mqtt/0x804b50fffe2c2717/set"
+          payload: '{"warning": {"duration": 0, "mode": "stop", "strobe": false}}'
+
+
+# Telegram bot integration
+telegram_bot:
+  - platform: polling
+    api_key: <SECRET>
+    allowed_chat_ids:
+      - <CHAT ID 1>
+      - <CHAT ID 2>
+
+notify:
+  - name: marco
+    platform: telegram
+    chat_id: <CHAT ID>
+  - name: tania
+    platform: telegram
+    chat_id: <CHAT ID>
+  - name: famiglia
+    platform: group
+    services:
+      - service: marco
+      - service: tania
+
+# Alarm Control Panel      
+alarm_control_panel:
+  - platform: manual
+    name: Home
+    code: "SECRET CODE"
+    arming_time: 300
+    delay_time: 20
+    trigger_time: 180
+    disarmed:
+      trigger_time: 0
+    armed_home:
+      arming_time: 0
+      delay_time: 0 
+
+automation:
+- alias: "Rilievo allarme assenza"
+  id: "rilievo_allarme_assenza"
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.0x00158d0002a1e3b4_contact, binary_sensor.0x00158d0002a23096_contact, binary_sensor.0x00158d00044e5ef5_contact, binary_sensor.0x00158d0006f9869e_contact, binary_sensor.0x00158d0006b7a17a_occupancy, binary_sensor.0x00158d0006b7bbfa_occupancy
+      to: "on"
+  condition:
+    - condition: state
+      entity_id: alarm_control_panel.home
+      state: armed_away
+  action:
+    service: alarm_control_panel.alarm_trigger
+    target:
+      entity_id: alarm_control_panel.home
+
+- alias: "Rilievo allarme presenza"
+  id: "rilievo_allarme_presenza"
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.0x00158d0002a1e3b4_contact, binary_sensor.0x00158d0002a23096_contact, binary_sensor.0x00158d00044e5ef5_contact, binary_sensor.0x00158d0006f9869e_contact
+      to: "on"
+  condition:
+    - condition: state
+      entity_id: alarm_control_panel.home
+      state: armed_home
+  action:
+    service: alarm_control_panel.alarm_trigger
+    target:
+      entity_id: alarm_control_panel.home
+
+- alias: 'Innesco'
+  id: "innesco"
+  trigger:
+    - platform: state
+      entity_id: alarm_control_panel.home
+      to: "triggered"
+  action:
+    - service: switch.turn_on
+      entity_id: switch.heiman_siren
+    - service: notify.famiglia
+      data:
+        message: "ATTENZIONE, ALLARME INNESCATO!"
+
+- alias: 'Disinnesco'
+  id: "disinnesco"
+  trigger:
+    - platform: state
+      entity_id: alarm_control_panel.home
+      to: "disarmed"
+  action:
+    - service: switch.turn_off
+      entity_id: switch.heiman_siren
+    - service: notify.famiglia
+      data:
+        message: "Allarme disinnescato"
+
+- alias: "Disarmo notturno"
+  id: "disarmo_notturno"
+  trigger:
+    - platform: time
+      at: "06:30:00"
+  condition:
+    - condition: state
+      entity_id: alarm_control_panel.home
+      state: 'armed_home'
+  action:
+    - service: alarm_control_panel.alarm_disarm
+      data:
+        code: 'SECRET CODE'
+      target:
+        entity_id: alarm_control_panel.home
+
+- alias: "Armo notturno"
+  id: "armo_notturno"
+  trigger:
+    - platform: time
+      at: '01:30:00'
+  condition:
+    condition: not
+    conditions:
+    - condition: state
+      entity_id: alarm_control_panel.home
+      state: 'armed_away'
+  action:
+    - service: alarm_control_panel.alarm_arm_home
+      data:
+        code: 'SECRET CODE'
+      entity_id: alarm_control_panel.home
+    - service: notify.famiglia
+      data:
+        message: "Allarme notturno innescato"

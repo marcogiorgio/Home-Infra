@@ -1,0 +1,172 @@
+# Default values for Webapp.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+#
+
+logsNamespace:
+  name: logs
+
+webappNamespace:
+  name: webapp
+
+elasticsearchService:
+  spec:
+    selector:
+      app: elasticsearch
+  metadata:
+    name: elasticsearch-service 
+    namespace: logs
+  ports:
+    requestsPort: 9200
+    requestsName: elasticsearch-requests
+    communicationsPort: 9300
+    communicationsName: elasticsearch-communications
+
+kibanaService:
+  spec:
+    selector:
+      app: kibana
+  metadata:
+    name: kibana-service 
+    namespace: logs
+  port: 5601
+  targetPort: http-kibana
+
+webserverService:
+  spec:
+    selector:
+      app: webapp
+  metadata:
+    name: webserver-service
+    namespace: webapp
+  port: 80
+  targetPort: http-webserver
+
+ingressLogs:
+  metadata:
+    name: nginx-ingress-logs
+    namespace: logs
+  spec:
+    ingressClassName: nginx
+    rules:
+      host: k8s-monitor.marcogiorgio.net
+      serviceName: kibana-service
+      portNumber: 5601
+
+webappDeployment:
+  metadata:
+    name: webapp
+    namespace: webapp
+  labels:
+    type: backend
+  spec:
+    replicas: 2
+    selector:
+      matchLabels:
+        app: webapp
+    template:
+      metadata:
+        labels:
+          app: webapp
+      spec: 
+        webappContainerName: webapp
+        webappContainerImage: stenote/nginx-hostname
+        webappContainerPort: 80
+        webappContainerPortName: http-webserver
+
+kibanaDeployment:
+  metadata:
+    name: kibana
+    namespace: logs
+  labels:
+    type: backend
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: kibana
+    template:
+      metadata:
+        labels:
+          app: kibana
+      spec: 
+        webappContainerName: kibana
+        webappContainerImage: kibana:7.11.1
+        webappContainerPort: 5601
+        webappContainerPortName: http-kibana
+        env:
+          elasticsearch_hosts: http://elasticsearch-service:9200
+          xpack_security_enabled: "false"
+
+elasticsearchDeployment:
+  metadata:
+    name: elasticsearch
+    namespace: logs
+  labels:
+    type: backend
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: elasticsearch
+    template:
+      metadata:
+        labels:
+          app: elasticsearch
+      spec: 
+        webappContainerName: elasticsearch
+        webappContainerImage: elasticsearch:7.11.1
+        webappContainerPort: 
+          - 9200
+          - 9300
+        webappContainerPortName: http-kibana
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: "false"
+        volumeMounts:
+          name: elasticsearch-data
+          mountPath: /usr/share/elasticsearch/data
+        resources:
+          limits:
+            memory: "1G"
+      volumes:
+        name: elasticsearch-data
+        hostPath:
+          path: /tmp/elasticsearch-data
+
+fluentdDemonSet:
+  metadata:
+    name: fluentd
+    namespace: kube-system
+    labels:
+      k8sapp: fluentd-logging
+      version: v1
+      kubernetes_io_cluster_service: "true"
+  spec: 
+    selector:
+      matchLabels:
+        k8s_app: fluentd-logging
+        version: v1
+    template:
+      metadata:
+        labels:
+          k8s_app: fluentd-logging
+          version: v1
+          kubernetes_io_clusterS_service: "true"
+      spec:
+        serviceAccount: fluentd
+        serviceAccountName: fluentd
+        containers:
+          name: fluentd
+          image: fluent/fluentd-kubernetes-daemonset:debian-elasticsearch
+          env:
+            FLUENT_ELASTICSEARCH_HOST: "elasticsearch-service.logs"
+            FLUENT_ELASTICSEARCH_PORT: "9200"
+            FLUENT_ELASTICSEARCH_SCHEME: "http"
+            FLUENT_UID: "0"
+          resources:
+            limits:
+              memory: 200Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi

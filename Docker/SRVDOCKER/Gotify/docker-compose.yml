@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+
+  gotify:
+    container_name: gotify
+    image: gotify/server
+    environment:
+      - TZ=${TZ}
+      - GOTIFY_DATABASE_DIALECT=${GOTIFY_DATABASE_DIALECT}
+      - GOTIFY_DATABASE_CONNECTION=${GOTIFY_DATABASE_CONNECTION}
+    restart: always
+    volumes:
+      - gotify-data:/app/data
+    ports:
+      - 9010:80
+    depends_on:
+      - db
+
+
+
+  db:
+    container_name: gotify-db
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER_FILE=/run/secrets/postgres_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+      - POSTGRES_DB_FILE=/run/secrets/postgres_db
+    secrets:
+      - postgres_user
+      - postgres_password
+      - postgres_db
+    restart: always
+    volumes:
+      - gotify-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "gotify"]
+      interval: 10s
+      start_period: 30s
+volumes:
+  gotify-db:
+  gotify-data:
+  
+secrets:
+  postgres_user:
+    file: ./Secrets/postgres_user.txt
+    
+  postgres_password:
+    file: ./Secrets/postgres_password.txt
+    
+  postgres_db:
+    file: ./Secrets/postgres_db.txt

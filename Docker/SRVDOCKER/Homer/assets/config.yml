@@ -1,0 +1,376 @@
+---
+# Homepage configuration
+# See https://fontawesome.com/icons for icons options
+
+title: "Dashboard"
+subtitle: "Marco Realm"
+logo: "logo.png"
+#icon: "fas fa-skull-crossbones" # Optional icon
+
+connectivityCheck: true # whether you want to display a message when the apps are not accessible anymore (VPN disconnected for example)
+header: true
+footer: false # set false if you want to hide it.
+
+
+# Optional theme customization
+theme: default
+colors:
+  light:
+    highlight-primary: "#3367d6"
+    highlight-secondary: "#4285f4"
+    highlight-hover: "#5a95f5"
+    background: "#f5f5f5"
+    card-background: "#ffffff"
+    text: "#363636"
+    text-header: "#ffffff"
+    text-title: "#303030"
+    text-subtitle: "#424242"
+    card-shadow: rgba(0, 0, 0, 0.1)
+    link: "#3273dc"
+    link-hover: "#363636"
+  dark:
+    highlight-primary: "#3367d6"
+    highlight-secondary: "#4285f4"
+    highlight-hover: "#5a95f5"
+    background: "#131313"
+    card-background: "#2b2b2b"
+    text: "#eaeaea"
+    text-header: "#ffffff"
+    text-title: "#fafafa"
+    text-subtitle: "#f5f5f5"
+    card-shadow: rgba(0, 0, 0, 0.4)
+    link: "#3273dc"
+    link-hover: "#ffdd57"
+
+# Optional message
+message: false
+#  url: https://b4bz.io
+#  style: "is-dark" # See https://bulma.io/documentation/components/message/#colors for styling options.
+#  title: "Demo !"
+#  icon: "fa fa-grin"
+#  content: "This is a dummy homepage demo. <br /> Find more information on <a href='https://github.com/bastienwirtz/homer'>github.com/bastienwirtz/homer<#/a>"
+
+# Optional navbar
+# links: [] # Allows for navbar (dark mode, layout, and search) without any links
+links:
+  - name: "Webmail"
+    icon: "fas fa-envelope"
+    url: "https://mail.protonmail.com"
+    target: "_blank" # optional html a tag target attribute
+  - name: "Whoogle"
+    icon: "fab fa-google"
+    url: "https://whoogle.marcogiorgio.net/"
+    target: "_blank" # optional html a tag target attribute
+  - name: "Piped"
+    icon: "fab fa-youtube"
+    url: "https://piped.marcogiorgio.net/"
+    target: "_blank" # optional html a tag target attribute
+  - name: "Lingva"
+    icon: "fa fa-language"
+    url: "https://translate.marcogiorgio.net/"
+    target: "_blank" # optional html a tag target attribute
+  - name: "Libreddit"
+    icon: "fab fa-reddit"
+    url: "https://libreddit.marcogiorgio.net/"
+    target: "_blank" # optional html a tag target attribute
+  # this will link to a second homer page that will load config from additional-page.yml and keep default config values as in config.yml file
+  # see url field and assets/additional-page.yml.dist used in this example:
+  #- name: "another page!"
+  #  icon: "fas fa-file-alt"
+  #  url: "#additional-page" 
+
+# Services
+# First level array represent a group.
+# Leave only a "items" key if not using group (group name, icon & tagstyle are optional, section separation will not be displayed).
+services:
+  - name: "Multimedia"
+    icon: "fas fa-photo-video"
+    items:
+      - name: "Emby"
+        logo: "assets/tools/png/emby.png"
+        subtitle: "Emby media server"
+        tag: "app"
+        url: "https://emby.marcogiorgio.net"
+        type: "Emby"
+        apikey: "bce9ae9f30444548a2ff29fb2b78ac94"
+        libraryType: "series"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Torrent"
+        logo: "assets/tools/png/qbittorrent.png"
+        subtitle: "qBittorrent Web client"
+        tag: "app"
+        target: "_blank"
+        url: "https://qbittorrent.marcogiorgio.net"
+      - name: "aMule"
+        logo: "assets/tools/png/amule.png"
+        subtitle: "aMule Web client"
+        tag: "app"
+        target: "_blank"
+        url: "https://amule.marcogiorgio.net"
+      - name: "Sonarr"
+        logo: "assets/tools/png/sonarr.png"
+        subtitle: "Sonarr Web client"
+        tag: "app"
+        target: "_blank"
+        url: "https://sonarr.marcogiorgio.net"
+        type: "Sonarr"
+        apikey: "9377af91178f473e86762aaddaddedbe"
+      - name: "Radarr"
+        logo: "assets/tools/png/radarr.png"
+        subtitle: "Radarr Web client"
+        tag: "app"
+        target: "_blank"
+        url: "https://radarr.marcogiorgio.net"
+        type: "Radarr"
+        apikey: "f2dc248fe10a4a78951986077d905a04"
+      - name: "Lidarr"
+        logo: "assets/tools/png/lidarr.png"
+        subtitle: "Lidarr Web client"
+        tag: "app"
+        target: "_blank"
+        url: "https://lidarr.marcogiorgio.net"
+        type: "Lidarr"
+        apikey: "33fd8dbf877b48a880aa2a74c6cef02b"
+      - name: "Readarr"
+        logo: "assets/tools/png/readarr.png"
+        subtitle: "Readarr Web client"
+        tag: "app"
+        target: "_blank"
+        url: "https://readarr.marcogiorgio.net"
+      - name: "Ombi"
+        logo: "assets/tools/png/ombi.png"
+        subtitle: "Ombi Web app"
+        tag: "app"
+        target: "_blank"
+        url: "https://ombi.marcogiorgio.net"
+      - name: "Prowlarr"
+        logo: "assets/tools/png/prowlarr.png"
+        subtitle: "Prowlarr Web client"
+        tag: "app"
+        target: "_blank"
+        url: "https://prowlarr.marcogiorgio.net"
+      - name: "Bazarr"
+        logo: "assets/tools/png/bazarr.png"
+        subtitle: "Bazarr Web client"
+        tag: "app"
+        target: "_blank"
+        url: "https://bazarr.marcogiorgio.net"
+      - name: "Calibre"
+        logo: "assets/tools/png/calibreweb.png"
+        subtitle: "Calibre Web"
+        tag: "app"
+        target: "_blank"
+        url: "https://calibre.marcogiorgio.net"
+      - name: "Bookstack"
+        logo: "assets/tools/png/bookstack.png"
+        subtitle: "Bookstack Web app"
+        tag: "app"
+        target: "_blank"
+        url: "https://wiki.marcogiorgio.net"
+      - name: "Hedgedoc"
+        logo: "assets/tools/png/hedgedoc.png"
+        subtitle: "Hedgedoc Web app"
+        tag: "app"
+        target: "_blank"
+        url: "https://hedgedoc.marcogiorgio.net"
+      - name: "Miniflux"
+        logo: "assets/tools/png/miniflux.png"
+        subtitle: "Miniflux RSS"
+        tag: "app"
+        target: "_blank"
+        url: "https://feed.marcogiorgio.net"
+  - name: "Network"
+    icon: "fas fa-network-wired"
+    items:
+      - name: "OPNSense"
+        logo: "assets/tools/png/opnsense.png"
+        subtitle: "OPNSense Web console"
+        tag: "app"
+        url: "https://10.0.0.1:8090"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Zyxel Core Switch"
+        logo: "assets/tools/png/network-switch.png"
+        subtitle: "Zyxel switch Web console"
+        tag: "app"
+        url: "http://10.0.0.12"
+        target: "_blank" # optional html a tag target attribute
+      - name: "TP Link 16 ports Switch"
+        logo: "assets/tools/png/network-switch.png"
+        subtitle: "TP Link switch Web console"
+        tag: "app"
+        url: "http://10.0.0.2"
+        target: "_blank" # optional html a tag target attribute
+      - name: "TP Link 8 ports Living Room Switch"
+        logo: "assets/tools/png/network-switch.png"
+        subtitle: "TP Link switch Web console"
+        tag: "app"
+        url: "http://10.0.0.11"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Zyxel 12 ports Bedroom Switch"
+        logo: "assets/tools/png/network-switch.png"
+        subtitle: "Zyxel switch Web console"
+        tag: "app"
+        url: "http://10.0.0.9"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Cambium Access point"
+        logo: "assets/tools/png/network-ap.png"
+        subtitle: "Cambium E410 Web console"
+        tag: "app"
+        url: "http://10.0.0.5"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Fastweb router"
+        logo: "assets/tools/png/network-router.png"
+        subtitle: "Fastweb router Web console"
+        tag: "app"
+        url: "http://192.168.1.254/#/login"
+        target: "_blank" # optional html a tag target attribute
+  - name: "Infra tools"
+    icon: "fas fa-server"
+    items:
+      - name: "Status"
+        logo: "assets/tools/svg/uptime-kuma.svg"
+        subtitle: "Uptime Kuma Web console"
+        tag: "app"
+        url: "https://status.marcogiorgio.net"
+        type: "UptimeKuma"
+        slug: "critical"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Portainer"
+        logo: "assets/tools/png/portainer.png"
+        subtitle: "Portainer Web console"
+        tag: "app"
+        url: "https://portainer.marcogiorgio.net"
+        target: "_blank" # optional html a tag target attribute
+        type: "Portainer"
+        apikey: "ptr_pIaTFYKj2DEYKX6gK+baxWSLh937n16sfjC8ikkigpw="
+      - name: "Adguard"
+        logo: "assets/tools/png/adguardhome.png"
+        subtitle: "Adguard Web console"
+        tag: "app"
+        url: "https://adguard.marcogiorgio.net"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Guacamole"
+        logo: "assets/tools/png/guacamole.png"
+        subtitle: "Guacamole Web console"
+        tag: "app"
+        url: "https://guacamole.marcogiorgio.net"
+        target: "_blank" # optional html a tag target attribute
+      - name: "LibreNMS"
+        logo: "assets/tools/png/librenms.png"
+        subtitle: "LibreNMS Web console"
+        tag: "app"
+        url: "https://librenms.marcogiorgio.net/login"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Gotify"
+        logo: "assets/tools/png/gotify.png"
+        subtitle: "Gotify Web console"
+        tag: "app"
+        url: "https://gotify.marcogiorgio.net/"
+        target: "_blank" # optional html a tag target attribute  
+      - name: "UPS Management card"
+        logo: "assets/tools/png/ups-apc.png"
+        subtitle: "APC UPS Mangement card Web console"
+        tag: "app"
+        url: "https://10.0.0.4"
+        target: "_blank" # optional html a tag target attribute
+      - name: "UPS Powerchute"
+        logo: "assets/tools/png/ups-apc.png"
+        subtitle: "APC UPS Powerchute Web console"
+        tag: "app"
+        url: "https://10.0.0.7:6547"
+        target: "_blank" # optional html a tag target attribute
+      - name: "2FAuth"
+        logo: "assets/tools/svg/2fauth.svg"
+        subtitle: "2FAuth Web console"
+        tag: "app"
+        url: "https://2fauth.marcogiorgio.net"
+        target: "_blank" # optional html a tag target attribute            
+  - name: "Documents and files"
+    icon: "fas fa-file"
+    items:
+      - name: "Paperless-ngx"
+        logo: "assets/tools/png/paperless-ng.png"
+        subtitle: "Paperless ngx"
+        tag: "app"
+        url: "https://paperless.marcogiorgio.net"
+        target: "_blank" # optional html a tag target attribute
+        type: "PaperlessNG"
+        apikey: "c1b0b083a0fdaa46b792c77836b53095ec520032"
+      - name: "Docspell"
+        logo: "assets/tools/png/docspell.png"
+        subtitle: "Docspell"
+        tag: "app"
+        url: "https://docspell.marcogiorgio.net"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Seafile"
+        logo: "assets/tools/png/seafile.png"
+        subtitle: "Seafile Web app"
+        tag: "app"
+        url: "https://seafile.marcogiorgio.net"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Snapdrop"
+        logo: "assets/tools/png/snapdrop.png"
+        subtitle: "Snapdrop Web app"
+        tag: "app"
+        url: "https://snapdrop.marcogiorgio.net"
+        target: "_blank" # optional html a tag target attribute  
+  - name: "Server and Storage"
+    icon: "fas fa-hdd"
+    items:
+      - name: "ESXi Shuttle"
+        logo: "assets/tools/png/esxi.png"
+        subtitle: "ESXi shuttle Web console"
+        tag: "app"
+        url: "https://10.0.0.3/ui/#/login"   
+        target: "_blank" # optional html a tag target attribute
+      - name: "NAS01" 
+        logo: "assets/tools/png/synology.png"
+        subtitle: "NAS01 Web console"
+        tag: "app"
+        url: "https://nas01.marcogiorgio.net"
+        target: "_blank" # optional html a tag target attribute
+      - name: "NAS02" 
+        logo: "assets/tools/png/synology.png"
+        subtitle: "NAS02 Web console"
+        tag: "app"
+        url: "https://nas02.marcogiorgio.net"
+        target: "_blank" # optional html a tag target attribute      
+  - name: "Security and surveillance"
+    icon: "fas fa-eye"
+    items:
+      - name: "Home assistant alarm system"
+        logo: "assets/tools/png/home-assistant.png"
+        subtitle: "Alarm control panel"
+        tag: "app"
+        url: "https://fakthieves.marcogiorgio.net"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Blue Iris"
+        logo: "assets/tools/png/blueiris.png"
+        subtitle: "Blue Iris control panel"
+        tag: "app"
+        url: "https://surveillance.marcogiorgio.net"
+        target: "_blank" # optional html a tag target attribute  
+  - name: "Finance"   
+    icon:  "fas fa-money-check-alt"
+    items:
+      - name: "Firefly III"
+        logo: "assets/tools/png/firefly.png"
+        subtitle: "Firefly III Web app"
+        tag: "app"
+        url: "https://firefly.marcogiorgio.net"
+        target: "_blank" # optional html a tag target attribute
+      - name: "Ihatemoney"
+        logo: "assets/tools/png/ihatemoney.png"
+        subtitle: "Ihatemoney Web app"
+        tag: "app"
+        url: "https://ihatemoney.marcogiorgio.net"
+        target: "_blank" # optional html a tag target attribute
+  - name: "DevOps"
+    icon: "fas fa-code"
+    items:
+      - name: "Gitea"
+        logo: "assets/tools/png/gitea.png"
+        subtitle: "Gitea Web app"
+        tag: "app"
+        url: "https://gitea.marcogiorgio.net"
+        target: "_blank" # optional html a tag target attribute  

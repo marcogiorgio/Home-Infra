@@ -1,0 +1,63 @@
+version: "3"
+services:
+  mariadb:
+    image: lscr.io/linuxserver/mariadb:latest
+    container_name: hedgedoc-mariadb
+    restart: always
+    volumes:
+      - db:/config
+    environment:
+      - FILE__MYSQL_ROOT_PASSWORD=/run/secrets/mysql_root_password
+      - FILE__MYSQL_DATABASE=/run/secrets/mysql_database
+      - FILE__MYSQL_USER=/run/secrets/mysql_user
+      - FILE__MYSQL_PASSWORD=/run/secrets/mysql_password
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ=${TZ}
+    secrets:
+      - mysql_root_password
+      - mysql_database
+      - mysql_user
+      - mysql_password
+  
+  hedgedoc:
+    image: lscr.io/linuxserver/hedgedoc:latest
+    container_name: hedgedoc
+    restart: always
+    depends_on:
+      - mariadb
+    volumes:
+      - config:/config
+    environment:
+      - DB_HOST=${DB_HOST}
+      - FILE__DB_USER=/run/secrets/mysql_user
+      - FILE__DB_PASS=/run/secrets/mysql_password
+      - FILE__DB_NAME=/run/secrets/mysql_database
+      - DB_PORT=${DB_PORT}
+      - PGID=${PGID}
+      - PUID=${PUID}
+      - TZ={TZ}
+      - CMD_DOMAIN=${CMD_DOMAIN}
+      - CMD_URL_ADDPORT=${CMD_URL_ADDPORT}
+      - CMD_PROTOCOL_USESSL=${CMD_PROTOCOL_USESSL}
+      - CMD_PORT=${CMD_PORT}
+    secrets:
+      - mysql_database
+      - mysql_user
+      - mysql_password 
+    ports:
+      - "8020:8020"
+
+volumes:
+  config:
+  db:
+  
+secrets:
+  mysql_root_password:
+    file: ./Secrets/mysql_root_password.txt
+  mysql_database:
+    file: ./Secrets/mysql_database.txt
+  mysql_user:
+    file: ./Secrets/mysql_user.txt
+  mysql_password:
+    file: ./Secrets/mysql_password.txt

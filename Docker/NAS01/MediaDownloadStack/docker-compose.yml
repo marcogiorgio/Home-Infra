@@ -1,0 +1,159 @@
+version: "2.1"
+services:
+  vpn:
+    image: dperson/openvpn-client
+    container_name: vpn
+    # cap_add, security_opt, and volume required for the image to function
+    cap_add:
+      - net_admin
+    env_file:
+      - ./env/vpn.env
+    networks:
+      - default
+    #  if using '-d' or 'DNS' you can't enable the `read_only: true` option
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    restart: unless-stopped
+    security_opt:
+      - label:disable
+    stdin_open: true
+    tty: true
+    ports:
+      - 8080:8080 #qbittorrent web ui
+      - 58433:58433/udp #qbittorrent 
+      - 58433:58433 # qbittorrent
+      - 4711:4711 # amule web ui
+      - 4712:4712 # amule remote gui, webserver, cmd ...
+      - 56630:4662 # amule ed2k tcp
+      - 57043:4665/udp # amule ed2k global search udp (tcp port +3)
+      - 54825:4672/udp # amule ed2k udp
+
+    volumes:
+      - /dev/net:/dev/net:z
+      - /volume1/docker/MediaDownloadStack/vpn:/vpn
+    # Put .ovpn configuration file in the /vpn directory (in "volumes:" above or
+    # launch using the command line arguments, IE pick one:
+    #  - ./vpn:/vpn
+    # command: 'server;user;password[;port]'
+
+  qbittorrent:
+     image: linuxserver/qbittorrent
+     container_name: qbittorrent
+     env_file:
+       - ./env/qbittorrent.env
+     volumes:
+       - /volume1/docker/MediaDownloadStack/torrent/config:/config
+       - /volume1/Torrent:/data/torrent
+     network_mode: service:vpn
+     restart: always
+     depends_on:
+       - vpn
+
+  sonarr:
+    image: ghcr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    env_file:
+       - ./env/sonarr.env
+    ports:
+      - 8989:8989
+    volumes:
+      - /volume1/docker/MediaDownloadStack/sonarr/config:/data/config
+      - /volume1/Media/Serie TV:/data/media/tv
+      - /volume1/Torrent/:/data/torrent/
+    depends_on:
+      - qbittorrent
+    restart: always
+
+  lidarr:
+    image: lscr.io/linuxserver/lidarr:latest
+    container_name: lidarr
+    env_file:
+       - ./env/lidarr.env
+    ports:
+      - 7877:8686
+    volumes:
+      - /volume1/docker/MediaDownloadStack/lidarr/config:/config
+      - /volume1/Media/Musica:/data/media/music
+      - /volume1/Torrent/:/data/torrent/
+    depends_on:
+      - qbittorrent
+    restart: always
+
+  radarr:
+    image: ghcr.io/linuxserver/radarr:latest
+    container_name: radarr
+    env_file:
+       - ./env/radarr.env
+    ports:
+      - 7879:7878
+    volumes:
+      - /volume1/docker/MediaDownloadStack/radarr/config:/config
+      - /volume1/Media/Film:/data/media/movies
+      - /volume1/Torrent/:/data/torrent/
+    depends_on:
+      - qbittorrent
+    restart: always
+
+  readarr:
+    image: lscr.io/linuxserver/readarr:develop
+    container_name: readarr
+    env_file:
+       - ./env/readarr.env
+    ports:
+      - 7876:8787
+    volumes:
+      - /volume1/docker/MediaDownloadStack/readarr/config:/config
+      - /volume1/Media/eBook:/data/media/books
+      - /volume1/Torrent/:/data/torrent/
+    depends_on:
+      - qbittorrent
+    restart: always
+
+  bazarr:
+    image: lscr.io/linuxserver/bazarr
+    container_name: bazarr
+    env_file:
+      - ./env/bazarr.env
+    volumes:
+      - /volume1/docker/MediaDownloadStack/bazarr/config:/config
+      - /volume1/Media/Film:/data/media/movies
+      - /volume1/Media/Serie TV:/data/media/tv
+    ports:
+      - 6767:6767
+    restart: always
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:develop
+    container_name: prowlarr
+    env_file:
+      - ./env/prowlarr.env
+    volumes:
+      - /volume1/docker/MediaDownloadStack/prowlarr/config:/config
+    ports:
+      - 9696:9696
+    restart: always
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    env_file:
+      - ./env/flaresolverr.env
+    ports:
+      - 8191:8191
+    restart: always
+
+  amule:
+    image: ngosang/amule
+    container_name: amule
+    env_file:
+      - ./env/amule.env
+    volumes:
+      - /volume1/docker/MediaDownloadStack/aMule:/home/amule/.aMule
+      - /volume1/aMule:/incoming
+      - /volume1/docker/MediaDownloadStack/aMule/temp:/temp
+    network_mode: service:vpn
+    restart: always
+    depends_on:
+      - vpn

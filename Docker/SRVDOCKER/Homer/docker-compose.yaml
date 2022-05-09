@@ -1,0 +1,16 @@
+version: "2"
+services:
+  homer:
+    image: b4bz/homer
+    container_name: homer-marco
+    volumes:
+      - /home/marco/Docker/Homer/assets:/www/assets
+    ports:
+      - 8070:8080
+    user: ${UID}:${GID}
+    restart: always
+    networks:
+      - homer_marco
+networks:
+  homer_marco:
+    driver: bridge
